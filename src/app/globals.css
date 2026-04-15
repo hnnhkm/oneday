@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Leaflet CSS — required for the map picker on the instructor
+ * activity form. Pulled from the installed package so we don't
+ * pay for an external stylesheet fetch. */
+@import "leaflet/dist/leaflet.css";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  /* Current rendered height of the app header. HeaderShell (client)
+     keeps this in sync as the header shrinks on scroll — sticky
+     children (like the filter pill row) use `top-[var(--header-h)]`
+     so they dock flush under the header at all times, with no gap
+     appearing when the header compacts. Initial values match the
+     rest-state header heights (mobile 3.5rem / desktop 4rem). */
+  --header-h: 3.5rem;
+}
+@media (min-width: 768px) {
+  :root {
+    --header-h: 4rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Globally hide scrollbars while preserving scroll behavior. */
+html {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE / Edge legacy */
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
