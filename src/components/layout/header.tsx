@@ -53,25 +53,45 @@ export async function Header() {
 
         <nav className="hidden md:flex items-center gap-6 ml-auto mr-6">
           {user && (
-            <>
-              <Link
-                href="/bookings"
-                className="text-sm font-medium text-charcoal hover:text-primary-400 transition-colors"
-              >
-                {t("bookings")}
-              </Link>
-              <Link
-                href="/favorites"
-                className="text-sm font-medium text-charcoal hover:text-primary-400 transition-colors"
-              >
-                {t("favorites")}
-              </Link>
-            </>
+            <Link
+              href="/bookings"
+              className="text-sm font-medium text-charcoal hover:text-primary-400 transition-colors"
+            >
+              {t("bookings")}
+            </Link>
           )}
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
           <LanguageSwitcher />
+          {user && (
+            // Heart icon links to /favorites. Mirrors the heart users tap
+            // on every activity card so the affordance to "see what I
+            // saved" is visually identical to the affordance to save.
+            // Same SVG path as FavoriteButton for visual consistency.
+            // Dropdown still has a duplicate "Favorites" item for
+            // keyboard-only users and anyone who misses the icon.
+            <Link
+              href="/favorites"
+              aria-label={t("favorites")}
+              title={t("favorites")}
+              className="flex items-center justify-center w-9 h-9 text-charcoal hover:text-primary-400 transition-colors"
+            >
+              <svg
+                className="w-5 h-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                />
+              </svg>
+            </Link>
+          )}
           <UserMenu
             user={
               user

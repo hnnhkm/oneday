@@ -11,6 +11,7 @@ interface MobileNavProps {
 const baseItems = [
   { href: "/", labelKey: "home", icon: "🏠" },
   { href: "/activities", labelKey: "browse", icon: "🔍" },
+  { href: "/favorites", labelKey: "favorites", icon: "❤️" },
   { href: "/bookings", labelKey: "bookings", icon: "📋" },
   { href: "/settings", labelKey: "profile", icon: "👤" },
 ] as const;
@@ -25,8 +26,14 @@ export function MobileNav({ isApprovedInstructor = false }: MobileNavProps) {
   const t = useTranslations("nav");
   const pathname = usePathname();
 
+  // Approved instructors get an extra Instructor tab. To keep the bottom
+  // bar at exactly 5 tabs (6 gets cramped on small phones), we drop Home
+  // for them and slot Instructor between Bookings and Settings. Their
+  // natural landing is Browse or the Instructor dashboard anyway, so
+  // losing Home is low-cost.
+  const [, browse, favorites, bookings, settings] = baseItems;
   const navItems = isApprovedInstructor
-    ? [...baseItems.slice(0, 3), instructorItem, baseItems[3]]
+    ? [browse, favorites, bookings, instructorItem, settings]
     : baseItems;
 
   return (
