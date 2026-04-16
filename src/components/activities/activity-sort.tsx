@@ -3,6 +3,13 @@
 import { useTranslations } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function ActivitySort() {
   const t = useTranslations("activities");
@@ -25,19 +32,20 @@ export function ActivitySort() {
       <label className="text-sm text-charcoal-lighter whitespace-nowrap">
         {t("sortBy")}
       </label>
-      <select
-        value={currentSort}
-        onChange={(e) => handleSort(e.target.value)}
-        className="rounded border border-charcoal-lighter/30 bg-white px-3 py-1.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-primary-400"
-      >
-        {hasSearch && (
-          <option value="relevance">{t("sortRelevance")}</option>
-        )}
-        <option value="rating">{t("sortRating")}</option>
-        <option value="newest">{t("sortNewest")}</option>
-        <option value="price_asc">{t("sortPriceAsc")}</option>
-        <option value="price_desc">{t("sortPriceDesc")}</option>
-      </select>
+      <Select value={currentSort} onValueChange={handleSort}>
+        <SelectTrigger className="w-auto py-1.5">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {hasSearch && (
+            <SelectItem value="relevance">{t("sortRelevance")}</SelectItem>
+          )}
+          <SelectItem value="rating">{t("sortRating")}</SelectItem>
+          <SelectItem value="newest">{t("sortNewest")}</SelectItem>
+          <SelectItem value="price_asc">{t("sortPriceAsc")}</SelectItem>
+          <SelectItem value="price_desc">{t("sortPriceDesc")}</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 }

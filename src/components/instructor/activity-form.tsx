@@ -7,6 +7,13 @@ import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   CoverImageUploader,
   GalleryImageUploader,
 } from "@/components/instructor/image-uploader";
@@ -266,19 +273,21 @@ export function ActivityForm({ mode, activityId, initial, categories }: Props) {
           >
             {t("categoryLabel")}
           </label>
-          <select
-            id="category"
+          <Select
             value={form.category_id}
-            onChange={(e) => update("category_id", e.target.value)}
-            className="w-full rounded border border-charcoal-lighter/30 bg-white px-4 py-2.5 text-charcoal"
+            onValueChange={(v) => update("category_id", v)}
           >
-            <option value="">{t("categorySelect")}</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.icon} {c.name.pt}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="category">
+              <SelectValue placeholder={t("categorySelect")} />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.icon} {c.name.pt}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {fieldError === "category_id" && error && (
             <p className="mt-1 text-sm text-red-600">{error}</p>
           )}
@@ -370,20 +379,23 @@ export function ActivityForm({ mode, activityId, initial, categories }: Props) {
             >
               {t("durationLabel")}
             </label>
-            <select
-              id="duration"
-              value={form.duration_minutes}
-              onChange={(e) =>
-                update("duration_minutes", Number(e.target.value))
-              }
-              className="w-full rounded border border-charcoal-lighter/30 bg-white px-4 py-2.5 text-charcoal transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent"
+            <Select
+              value={String(form.duration_minutes)}
+              onValueChange={(v) => update("duration_minutes", Number(v))}
             >
-              {Array.from({ length: 16 }, (_, i) => (i + 1) * 30).map((mins) => (
-                <option key={mins} value={mins}>
-                  {formatDurationHours(mins)}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger id="duration">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 16 }, (_, i) => (i + 1) * 30).map(
+                  (mins) => (
+                    <SelectItem key={mins} value={String(mins)}>
+                      {formatDurationHours(mins)}
+                    </SelectItem>
+                  )
+                )}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -506,21 +518,21 @@ export function ActivityForm({ mode, activityId, initial, categories }: Props) {
             >
               {t("policyLabel")}
             </label>
-            <select
-              id="policy"
+            <Select
               value={form.cancellation_policy}
-              onChange={(e) =>
-                update(
-                  "cancellation_policy",
-                  e.target.value as CancellationPolicy
-                )
+              onValueChange={(v) =>
+                update("cancellation_policy", v as CancellationPolicy)
               }
-              className="w-full rounded border border-charcoal-lighter/30 bg-white px-4 py-2.5 text-charcoal"
             >
-              <option value="flexible">{t("policyFlexible")}</option>
-              <option value="moderate">{t("policyModerate")}</option>
-              <option value="strict">{t("policyStrict")}</option>
-            </select>
+              <SelectTrigger id="policy">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="flexible">{t("policyFlexible")}</SelectItem>
+                <SelectItem value="moderate">{t("policyModerate")}</SelectItem>
+                <SelectItem value="strict">{t("policyStrict")}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <Input
             id="no_show_fee"

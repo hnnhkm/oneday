@@ -12,6 +12,7 @@
     "db:types": "npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/lib/types/database.ts"
   },
   "dependencies": {
+    "@radix-ui/react-select": "^2.2.6",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.0.6",
     "@supabase/ssr": "^0.10.2",

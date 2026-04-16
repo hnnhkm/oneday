@@ -4,6 +4,13 @@ import { useEffect, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter, Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createCheckoutSessionAction } from "@/lib/actions/checkout";
 import { formatCurrency } from "@/lib/utils";
 import { useBookingFlow } from "./booking-flow/booking-flow-context";
@@ -168,19 +175,22 @@ export function BookingForm({
         >
           {t("seatsLabel")}
         </label>
-        <select
-          id="booking-seats"
-          value={seats}
-          onChange={(e) => setSeats(Number(e.target.value))}
+        <Select
+          value={String(seats)}
+          onValueChange={(v) => setSeats(Number(v))}
           disabled={isSoldOut || isPending}
-          className="w-full rounded-md border border-charcoal-lighter/20 bg-white px-3 py-2 text-sm focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-400"
         >
-          {Array.from({ length: maxSelectable }, (_, i) => i + 1).map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger id="booking-seats">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Array.from({ length: maxSelectable }, (_, i) => i + 1).map((n) => (
+              <SelectItem key={n} value={String(n)}>
+                {n}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex items-center justify-between text-sm">

@@ -6,7 +6,19 @@ import { useRouter, usePathname } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getTranslatedField } from "@/lib/utils";
+
+// Radix Select reserves empty string for the placeholder state, so
+// we map the "no filter" sentinel to a non-empty constant when we
+// hand values to the component and back again on change.
+const ALL_NEIGHBORHOODS = "__all";
 import type { Category, TranslatedField } from "@/lib/types/database";
 
 interface ActivityFiltersProps {
@@ -155,18 +167,26 @@ export function ActivityFilters({
           <label className="block text-xs font-medium text-charcoal-lighter mb-1">
             {t("neighborhood")}
           </label>
-          <select
-            value={neighborhood}
-            onChange={(e) => setNeighborhood(e.target.value)}
-            className="w-full rounded border border-charcoal-lighter/30 bg-white px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-primary-400"
+          <Select
+            value={neighborhood || ALL_NEIGHBORHOODS}
+            onValueChange={(v) =>
+              setNeighborhood(v === ALL_NEIGHBORHOODS ? "" : v)
+            }
           >
-            <option value="">{t("allNeighborhoods")}</option>
-            {neighborhoods.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_NEIGHBORHOODS}>
+                {t("allNeighborhoods")}
+              </SelectItem>
+              {neighborhoods.map((n) => (
+                <SelectItem key={n} value={n}>
+                  {n}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Price range */}
