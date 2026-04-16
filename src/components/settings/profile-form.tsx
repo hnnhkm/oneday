@@ -2,9 +2,17 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { AvatarUploader } from "./avatar-uploader";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { updateProfileAction } from "@/lib/actions/account";
 import type { PreferredLanguage, User } from "@/lib/types/database";
 
@@ -15,6 +23,7 @@ interface ProfileFormProps {
 export function ProfileForm({ user }: ProfileFormProps) {
   const t = useTranslations("settings");
   const router = useRouter();
+  const pathname = usePathname();
   const [name, setName] = useState(user.name);
   const [phone, setPhone] = useState(user.phone || "");
   const [avatarUrl, setAvatarUrl] = useState(user.avatar_url || "");
@@ -41,7 +50,17 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
       if (result.ok) {
         setMessage({ kind: "success", text: t("saveSuccess") });
-        router.refresh();
+        // If the user switched their preferred language, re-route to
+        // the same page under the new locale so the whole UI
+        // re-renders in that language immediately. `router.refresh()`
+        // alone only re-fetches server data on the current locale —
+        // it won't swap translations. When the language didn't
+        // change, a plain refresh is enough.
+        if (language !== user.preferred_language) {
+          router.replace(pathname, { locale: language });
+        } else {
+          router.refresh();
+        }
       } else {
         setMessage({
           kind: "error",
@@ -86,15 +105,14 @@ export function ProfileForm({ user }: ProfileFormProps) {
             placeholder="+55 11 98765-4321"
           />
           <div>
-            <Input
-              id="settings-avatar"
-              type="url"
-              label={t("avatarLabel")}
+            <label className="block text-sm font-medium text-charcoal mb-2">
+              {t("avatarLabel")}
+            </label>
+            <AvatarUploader
               value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder="https://..."
+              onChange={setAvatarUrl}
+              fallbackLetter={name || user.name || user.email}
             />
-            <p className="mt-1 text-xs text-charcoal-lighter">{t("avatarHelp")}</p>
           </div>
         </div>
       </section>
@@ -110,16 +128,19 @@ export function ProfileForm({ user }: ProfileFormProps) {
           >
             {t("preferredLanguageLabel")}
           </label>
-          <select
-            id="settings-language"
+          <Select
             value={language}
-            onChange={(e) => setLanguage(e.target.value as PreferredLanguage)}
-            className="rounded-md border border-charcoal-lighter/20 bg-white px-3 py-2 text-sm focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-400"
+            onValueChange={(v) => setLanguage(v as PreferredLanguage)}
           >
-            <option value="pt">Português</option>
-            <option value="en">English</option>
-            <option value="es">Español</option>
-          </select>
+            <SelectTrigger id="settings-language">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pt">Português</SelectItem>
+              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="es">Español</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </section>
 

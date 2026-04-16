@@ -10,6 +10,7 @@ import type { SavedSearch } from "@/lib/types/database";
 export default async function SavedSearchesPage() {
   const locale = await getLocale();
   const t = await getTranslations("savedSearches");
+  const tNav = await getTranslations("nav");
   const user = await getUser();
   if (!user) redirect(`/${locale}/login`);
 
@@ -17,6 +18,15 @@ export default async function SavedSearchesPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
+      {/* Back link to the settings hub — same pattern as the
+          notifications sub-page so every `/settings/*` route has a
+          visible way back to the parent. */}
+      <Link
+        href="/settings"
+        className="inline-flex items-center gap-1 text-sm text-charcoal-lighter hover:text-charcoal mb-4"
+      >
+        ← {tNav("settings")}
+      </Link>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-charcoal">
           {t("pageTitle")}

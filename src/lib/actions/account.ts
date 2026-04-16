@@ -18,6 +18,61 @@ export interface ActionResult {
   error?: string;
 }
 
+export interface UploadAvatarResult {
+  ok: boolean;
+  url?: string;
+  error?: string;
+}
+
+/**
+ * Upload a profile photo for the current user.
+ *
+ * Client resizes → posts a JPEG Blob wrapped in FormData → we land
+ * it in `avatars/{user_id}/{uuid}.jpg` and return the public URL.
+ *
+ * The RLS policy on `storage.objects` (see migration 00031) enforces
+ * that the first folder segment matches `auth.uid()`, so callers
+ * can't write into someone else's folder even if they forged a
+ * different path client-side. The caller is responsible for saving
+ * the returned URL onto `users.avatar_url` via `updateProfileAction`.
+ *
+ * We do NOT delete the previous avatar — Supabase storage is cheap
+ * and an orphaned file is lower-risk than a broken avatar if the
+ * profile update fails after the upload.
+ */
+export async function uploadAvatarAction(
+  formData: FormData
+): Promise<UploadAvatarResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not authenticated" };
+
+  const file = formData.get("file");
+  if (!(file instanceof File)) {
+    return { ok: false, error: "No file provided" };
+  }
+
+  const uuid = crypto.randomUUID();
+  const objectPath = `${user.id}/${uuid}.jpg`;
+
+  const { error } = await supabase.storage
+    .from("avatars")
+    .upload(objectPath, file, {
+      cacheControl: "3600",
+      contentType: file.type || "image/jpeg",
+      upsert: false,
+    });
+  if (error) return { ok: false, error: error.message };
+
+  const { data: urlData } = supabase.storage
+    .from("avatars")
+    .getPublicUrl(objectPath);
+
+  return { ok: true, url: urlData.publicUrl };
+}
+
 /**
  * Toggle a favorite for the current user. Returns the new state.
  * - If the row exists, delete it → favorited = false
