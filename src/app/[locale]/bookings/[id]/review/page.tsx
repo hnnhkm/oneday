@@ -44,25 +44,47 @@ export default async function WriteReviewPage({ params }: ReviewPageProps) {
     );
   }
 
+  // Previously this branch bounced the user with "you already
+  // reviewed this" — dead end. Now we flow through and hand the
+  // existing review to ReviewForm so the same screen serves as the
+  // edit screen.
   const existing = await fetchExistingReview(user.id, booking.activity_id);
-  if (existing) {
-    return (
-      <div className="mx-auto max-w-xl px-4 py-16 text-center">
-        <div className="text-5xl mb-4">✅</div>
-        <p className="text-charcoal-lighter">{t("alreadyReviewed")}</p>
-      </div>
-    );
-  }
+  const isEdit = Boolean(existing);
 
   return (
     <div className="mx-auto max-w-xl px-4 py-8">
       <h1 className="text-2xl md:text-3xl font-bold text-charcoal mb-2">
-        {t("title")}
+        {isEdit ? t("editTitle") : t("title")}
       </h1>
-      <p className="text-charcoal-lighter mb-8">
-        {t("subtitle", { title })}
+      <p className="text-charcoal-lighter mb-6">
+        {isEdit
+          ? t("editSubtitle", { title })
+          : t("subtitle", { title })}
       </p>
-      <ReviewForm activityId={booking.activity_id} />
+
+      {/* Public-content disclaimer. Required before the user submits
+          anything — reviews + photos end up on the activity's public
+          page. We display it above the form so it's impossible to
+          miss (in edit mode too, since existing photos are equally
+          public). */}
+      <div className="rounded-md bg-primary-50 border border-primary-100 text-charcoal text-sm px-4 py-3 mb-6 flex items-start gap-2">
+        <span aria-hidden="true">🌐</span>
+        <p>{t("publicDisclaimer")}</p>
+      </div>
+
+      <ReviewForm
+        activityId={booking.activity_id}
+        existing={
+          existing
+            ? {
+                reviewId: existing.id,
+                rating: existing.rating,
+                comment: existing.comment,
+                photos: existing.photos,
+              }
+            : undefined
+        }
+      />
     </div>
   );
 }

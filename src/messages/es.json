@@ -343,7 +343,8 @@
     "statusPending": "Pendiente",
     "statusCancelled": "Cancelada",
     "statusCompleted": "Completada",
-    "writeReview": "Escribir reseña"
+    "writeReview": "Escribir reseña",
+    "ratedStars": "{rating, plural, one {Calificado: # estrella} other {Calificado: # estrellas}}"
   },
   "booking": {
     "loginToBook": "Iniciar sesión para reservar",
@@ -373,6 +374,8 @@
   "review": {
     "title": "Escribir una reseña",
     "subtitle": "¿Cómo fue {title}?",
+    "editTitle": "Editar reseña",
+    "editSubtitle": "Actualiza tu reseña de {title}",
     "ratingLabel": "Tu calificación",
     "commentLabel": "Cuenta a otros sobre tu experiencia",
     "commentPlaceholder": "¿Qué te gustó? ¿Qué se podría mejorar?",
@@ -380,10 +383,14 @@
     "photosAdd": "Añadir foto",
     "photosRemove": "Eliminar foto",
     "photosHelp": "Hasta {max} fotos. Máx 10MB cada una.",
+    "publicDisclaimer": "Tu reseña, nombre y fotos se mostrarán públicamente en la página de esta actividad. Cualquier persona puede verlos.",
     "submit": "Enviar reseña",
+    "saveChanges": "Guardar cambios",
     "submitting": "Enviando...",
     "successTitle": "¡Gracias por tu reseña!",
     "successSubtitle": "Tus comentarios ayudan a otros a descubrir grandes experiencias.",
+    "successEditTitle": "¡Reseña actualizada!",
+    "successEditSubtitle": "Tus cambios ya son visibles para todos.",
     "backToBookings": "Volver a mis reservas",
     "alreadyReviewed": "Ya has reseñado esta actividad",
     "notEligible": "Esta reserva aún no se puede reseñar",

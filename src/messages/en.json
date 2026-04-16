@@ -343,7 +343,8 @@
     "statusPending": "Pending",
     "statusCancelled": "Cancelled",
     "statusCompleted": "Completed",
-    "writeReview": "Write a review"
+    "writeReview": "Write a review",
+    "ratedStars": "{rating, plural, one {Rated # star} other {Rated # stars}}"
   },
   "booking": {
     "loginToBook": "Log in to book",
@@ -373,6 +374,8 @@
   "review": {
     "title": "Write a review",
     "subtitle": "How was {title}?",
+    "editTitle": "Edit review",
+    "editSubtitle": "Update your review of {title}",
     "ratingLabel": "Your rating",
     "commentLabel": "Tell others about your experience",
     "commentPlaceholder": "What did you like? What could be better?",
@@ -380,10 +383,14 @@
     "photosAdd": "Add photo",
     "photosRemove": "Remove photo",
     "photosHelp": "Up to {max} photos. Max 10MB each.",
+    "publicDisclaimer": "Your review, name, and photos will be displayed publicly on this activity's page. Anyone can see them.",
     "submit": "Submit review",
+    "saveChanges": "Save changes",
     "submitting": "Submitting...",
     "successTitle": "Thanks for your review!",
     "successSubtitle": "Your feedback helps other learners discover great experiences.",
+    "successEditTitle": "Review updated!",
+    "successEditSubtitle": "Your changes are now visible to everyone.",
     "backToBookings": "Back to my bookings",
     "alreadyReviewed": "You have already reviewed this activity",
     "notEligible": "This booking is not eligible for a review yet",

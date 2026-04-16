@@ -221,3 +221,110 @@ export async function uploadReviewPhotoAction(
 
   return { ok: true, url: urlData.publicUrl };
 }
+
+/**
+ * Update an existing review's rating and comment. Photos are managed
+ * separately (`uploadReviewPhotoAction` for adding,
+ * `deleteReviewPhotoAction` for removing). We intentionally don't
+ * allow re-assigning the review to a different activity — there's
+ * no UI for it and the unique (user, activity) constraint makes it
+ * a footgun.
+ *
+ * Ownership is double-checked: we select the row first and bail if
+ * the caller doesn't own it. The RLS policy on `reviews` enforces
+ * the same thing, but failing fast gives a cleaner error.
+ */
+export async function updateReviewAction(
+  reviewId: string,
+  rating: number,
+  comment: string
+): Promise<ActionResult> {
+  const validationError = validateReview({ rating, comment });
+  if (validationError) return { ok: false, error: validationError.message };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not authenticated" };
+
+  const { data: existing } = await supabase
+    .from("reviews")
+    .select("id, user_id, activity_id")
+    .eq("id", reviewId)
+    .maybeSingle();
+  if (!existing) return { ok: false, error: "Review not found" };
+  const row = existing as { id: string; user_id: string; activity_id: string };
+  if (row.user_id !== user.id) {
+    return { ok: false, error: "Not authorized" };
+  }
+
+  const { error } = await supabase
+    .from("reviews")
+    .update({ rating, comment: comment.trim() })
+    .eq("id", reviewId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`/activities/${row.activity_id}`);
+  revalidatePath("/bookings");
+  return { ok: true };
+}
+
+/**
+ * Delete a single photo attached to a review. Removes the storage
+ * object too so we don't accumulate orphans.
+ *
+ * Ownership is verified via a join to `reviews` — the RLS policies
+ * would reject the DELETE anyway, but the explicit check lets us
+ * return a clearer error. The storage DELETE policy (see migration
+ * 00011) gates on the folder prefix matching `auth.uid()`.
+ */
+export async function deleteReviewPhotoAction(
+  photoId: string
+): Promise<ActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not authenticated" };
+
+  const { data: photo } = await supabase
+    .from("review_photos")
+    .select("id, image_url, review_id, reviews!inner (user_id, activity_id)")
+    .eq("id", photoId)
+    .maybeSingle();
+  if (!photo) return { ok: false, error: "Photo not found" };
+  const row = photo as unknown as {
+    id: string;
+    image_url: string;
+    review_id: string;
+    reviews: { user_id: string; activity_id: string };
+  };
+  if (row.reviews.user_id !== user.id) {
+    return { ok: false, error: "Not authorized" };
+  }
+
+  // Extract the storage object path from the public URL so we can
+  // clean up the underlying file. Same marker pattern the instructor
+  // image cleanup uses for activity-images.
+  const marker = "/review-photos/";
+  const idx = row.image_url.indexOf(marker);
+  const objectPath =
+    idx >= 0 ? row.image_url.slice(idx + marker.length) : null;
+
+  const { error: deleteErr } = await supabase
+    .from("review_photos")
+    .delete()
+    .eq("id", photoId);
+  if (deleteErr) return { ok: false, error: deleteErr.message };
+
+  if (objectPath) {
+    // Best-effort: the row is already gone, so a stray blob is the
+    // worst case. Don't fail the action over it.
+    await supabase.storage.from("review-photos").remove([objectPath]);
+  }
+
+  revalidatePath(`/activities/${row.reviews.activity_id}`);
+  revalidatePath("/bookings");
+  return { ok: true };
+}

@@ -13,6 +13,7 @@ import {
   type BookingTab,
   type BookingWithActivity,
 } from "@/lib/queries/bookings";
+import { fetchExistingReviewsForActivities } from "@/lib/queries/reviews";
 import {
   formatCurrency,
   formatDate,
@@ -59,6 +60,17 @@ export default async function BookingsPage({
 
   const visible = byTab[activeTab];
 
+  // Batch-fetch every existing review for this user's past-tab
+  // bookings in one round-trip so each card can decide whether to
+  // show "Avaliar" or "{N} estrelas" without an N+1.
+  const pastActivityIds = Array.from(
+    new Set(byTab.past.map((b) => b.activity_id))
+  );
+  const existingReviews = await fetchExistingReviewsForActivities(
+    user.id,
+    pastActivityIds
+  );
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <h1 className="text-2xl md:text-3xl font-bold text-charcoal mb-6">
@@ -104,6 +116,9 @@ export default async function BookingsPage({
               locale={locale}
               today={today}
               t={t}
+              existingRating={
+                existingReviews.get(booking.activity_id)?.rating ?? null
+              }
             />
           ))}
         </div>
@@ -133,11 +148,18 @@ function BookingCard({
   locale,
   today,
   t,
+  existingRating,
 }: {
   booking: BookingWithActivity;
   locale: string;
   today: string;
   t: BookingsT;
+  /**
+   * Star count of this user's existing review for the activity, or
+   * `null` when they haven't reviewed yet. Used to swap the "Avaliar"
+   * CTA for a "Rated N stars" edit link once a review exists.
+   */
+  existingRating: number | null;
 }) {
   const title = getTranslatedField(
     booking.activities.title as TranslatedField,
@@ -230,7 +252,9 @@ function BookingCard({
               href={`/bookings/${booking.id}/review` as "/bookings"}
               className="text-sm text-primary-400 font-medium hover:underline"
             >
-              ⭐ {t("writeReview")}
+              {existingRating != null
+                ? `⭐ ${t("ratedStars", { rating: existingRating })}`
+                : `⭐ ${t("writeReview")}`}
             </Link>
           )}
         </div>
